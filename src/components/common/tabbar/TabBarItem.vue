@@ -48,7 +48,7 @@ export default {
 }
 </script>
 
-<style >
+<style scoped>
 .tab-bar-item{
   flex: 1;
   height: 49px;
