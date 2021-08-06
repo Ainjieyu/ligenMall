@@ -4,26 +4,34 @@
       <div slot="center">购物街</div>
     </nav-bar>
 
+    <tab-control
+      ref="tabControl1"
+      :titles="['流行', '新款', '精选']"
+      @tabClick="tabClick"
+      class="tab-control"
+      v-show="isTabFixed"
+    ></tab-control>
+
     <scroll
       class="content"
       ref="scroll"
       :probe-type="3"
       @scroll="contentScroll"
       :pull-up-load="true"
-      @pullingUp = "loadMore"
+      @pullingUp="loadMore"
     >
-      <home-swiper :banners="banners" />
+      <home-swiper :banners="banners" @swiperImgLoad="swiperImgLoad" />
       <recommend-view :recommends="recommends" />
       <feature-view></feature-view>
       <tab-control
-        class="tab-control"
+        ref="tabControl2"
         :titles="['流行', '新款', '精选']"
         @tabClick="tabClick"
       ></tab-control>
       <goods-list :goods="showGoods" />
     </scroll>
 
-    <back-top @click.native="backClick" v-show="isShowBackTop"/>
+    <back-top @click.native="backClick" v-show="isShowBackTop" />
   </div>
 </template>
 
@@ -37,9 +45,11 @@ import GoodsList from "components/content/goods/GoodsList.vue";
 import NavBar from "components/common/navbar/NavBar";
 import TabControl from "components/content/tabControl/TabControl.vue";
 import Scroll from "components/common/scroll/Scroll.vue";
-import BackTop from "components/content/backTop/BackTop";
 // 网络请求
 import { getHomeMultidata, getHomeGoods } from "network/home";
+// 公共方法
+import { debounce } from "common/utils.js";
+import {itemListenerMixin,backTopMixin} from "common/mixin"
 
 export default {
   name: "home",
@@ -52,7 +62,6 @@ export default {
     NavBar,
     TabControl,
     Scroll,
-    BackTop
   },
   data() {
     return {
@@ -64,9 +73,12 @@ export default {
         sell: { page: 0, list: [] }
       },
       currentType: "pop",
-      isShowBackTop:false
+      TabOffsetTop: 0,
+      isTabFixed: false,
+      saveY: 0,    
     };
   },
+    mixins:[itemListenerMixin,backTopMixin],
   created() {
     // 1.请求多个数据
     this.getHomeMultidata();
@@ -74,6 +86,17 @@ export default {
     this.getHomeGoods("pop");
     this.getHomeGoods("new");
     this.getHomeGoods("sell");
+  },
+  activated() {
+    this.$refs.scroll.scrollTo(0,this.saveY,0)
+    this.$refs.scroll.refresh()
+  },
+  deactivated() {
+    this.saveY = this.$refs.scroll.getScrollY()
+
+    this.$bus.$off('itemImgLoad',this.itemImgListener)
+  },
+  mounted() {
   },
   computed: {
     showGoods() {
@@ -94,7 +117,7 @@ export default {
         this.goods[type].list.push(res.data.list);
         this.goods[type].page += 1;
 
-        this.$refs.scroll.finishPullUp()
+        this.$refs.scroll.finishPullUp();
       });
     },
     // 2.事件监听方法
@@ -110,15 +133,19 @@ export default {
           this.currentType = "sell";
           break;
       }
-    },
-    backClick() {
-      this.$refs.scroll.scrollTo(0, 0, 500);
+      this.$refs.tabControl1.currentIndex = index;
+      this.$refs.tabControl2.currentIndex = index;
     },
     contentScroll(position) {
-      this.isShowBackTop = (-position.y) >1000
+      this.ShowBackTop(position);
+
+      this.isTabFixed = -position.y > this.TabOffsetTop;
     },
-    loadMore(){
-      this.getHomeGoods(this.currentType)
+    loadMore() {
+      this.getHomeGoods(this.currentType);
+    },
+    swiperImgLoad() {
+      this.TabOffsetTop = this.$refs.tabControl2.$el.offsetTop;
     }
   }
 };
@@ -126,30 +153,15 @@ export default {
 
 <style scoped>
 #home {
-  padding-top: 44px;
+  /* padding-top: 44px; */
   height: 100vh;
   position: relative;
 }
 .home-nav {
   background: var(--color-tint);
   color: aliceblue;
+}
 
-  position: fixed;
-  left: 0;
-  right: 0;
-  top: 0;
-  z-index: 9;
-}
-.tab-control {
-  position: sticky;
-  top: 44px;
-  z-index: 9;
-}
-/* .content {
-  height: calc(100% - 93px);
-  overflow: hidden;
-  margin-top: 51px;
-} */
 .content {
   /* height: 300px; */
   overflow: hidden;
@@ -158,5 +170,9 @@ export default {
   bottom: 49px;
   right: 0;
   left: 0;
+}
+.tab-control {
+  position: relative;
+  z-index: 9;
 }
 </style>

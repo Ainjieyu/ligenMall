@@ -1,29 +1,28 @@
 <template>
-  <div class="goods-parent">
+
     <div
       ref="goodsItem"
       class="goods-item"
-      v-for="item in goodsItem"
-      :key="item.id"
       @click="itemClick(item)"
     >
-      <img v-lazy="item.show.img" alt="" @load="imgLoad" />
+    <!-- v-for="item in goodsItem" :key="item.id"  -->
+      <img :src="goodsItem.image" alt="" @load="imgLoad" />
       <div class="goods-info">
-        <p>{{ item.title }}</p>
-        <span class="price">{{ item.price }}</span>
-        <span class="collect">{{ item.cfav }}</span>
+        <p>{{ goodsItem.title }}</p>
+        <span class="price">{{ goodsItem.price }}</span>
+        <span class="collect">{{ goodsItem.cfav }}</span>
       </div>
     </div>
-  </div>
+
 </template>
 <script>
 export default {
-  name: "GoodsListItem",
+  name: "GoodsListItem2",
   props: {
     goodsItem: {
-      type: Array,
+      type: Object,
       default() {
-        return [];
+        return {};
       }
     }
   },
@@ -32,12 +31,6 @@ export default {
       obj: {}
     };
   },
-  // computed: {
-  //      showImages(item) {
-  //     console.log(item+"--------");
-  //     //  console.log(item.goodsItem.image)  item.show.img || item.goodsItem.image;
-  //   }
-  // },
   methods: {
     imgLoad() {
       this.$bus.$emit("itemImgLoad");
@@ -53,17 +46,8 @@ export default {
 };
 </script>
 <style scoped>
-.goods-parent {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-around;
-  padding: 2px;
-}
-.goods-item {
-  padding-bottom: 40px;
-  position: relative;
-  width: 49%;
-}
+
+
 
 .goods-item img {
   width: 100%;

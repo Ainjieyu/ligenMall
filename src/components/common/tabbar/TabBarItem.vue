@@ -1,67 +1,67 @@
 <template>
-
-    <div class="tab-bar-item" @click="itemClick">
-      <div v-if="!isActive">
-        <slot name="item-icon"></slot>
-      </div>
-      <div v-else>
-        <slot name="item-icon-active"></slot>
-      </div>
-      
-      <div  :style="activeStyle">
-        <slot name="item-text"></slot>   
-      </div>
+  <div class="tab-bar-item" @click="itemClick">
+    <div v-if="!isActive">
+      <slot name="item-icon"></slot>
+    </div>
+    <div v-else>
+      <slot name="item-icon-active"></slot>
     </div>
 
-
+    <div :style="activeStyle">
+      <slot name="item-text"></slot>
+    </div>
+  </div>
 </template>
 
 <script>
 export default {
-  name: 'TabBarItem',
-  props:{
-    path:String,
-    activeColor:{
-      type:String,
-      default:'red'
+  name: "TabBarItem",
+  props: {
+    path: String,
+    activeColor: {
+      type: String,
+      default: "red"
     }
   },
-  data(){
-    return{
+  data() {
+    return {
       // isActive:true
-    }
+    };
   },
-  computed:{
-    isActive() {
-      return this.$route.path.indexOf(this.path) !== -1;
+  computed: {
+    isActive: {
+      get() {
+        return this.$route.path.indexOf(this.path) !== -1;
+      },
+      set(val) {}
     },
-    activeStyle(){
-      return this.isActive ? {color:this.activeColor} : {}
+    activeStyle() {
+      return this.isActive ? { color: this.activeColor } : {};
     }
   },
-  methods:{
-    itemClick(){
+  methods: {
+    itemClick() {
       this.$router.push(this.path);
-      this.isActive = !this.isActive
+      this.isActive = !this.isActive;
     }
   }
-}
+};
 </script>
 
 <style scoped>
-.tab-bar-item{
+.tab-bar-item {
   flex: 1;
   height: 49px;
   text-align: center;
   font-size: 14px;
 }
-.tab-bar-item img{
+.tab-bar-item img {
   width: 24px;
   margin-top: 3px;
   vertical-align: middle;
   margin-bottom: 2px;
 }
-.active{
+.active {
   color: red;
 }
 </style>
