@@ -159,14 +159,7 @@ export default {
       cartGood.iid = this.iid;
 
       this.addCart(cartGood).then(res => {
-        // this.show = true;
-        // this.message = res;
-
-        // setTimeout(() => {
-        //   this.show = false;
-        //   this.message = "";
-        // }, 1500);
-        this.$toast.show()
+        this.$toast.show(res, 2000)
       });
 
       // this.$store.dispatch("addCart", cartGood).then(res => {
